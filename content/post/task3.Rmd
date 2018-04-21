@@ -1,0 +1,249 @@
+---
+title: "中级计量第三次作业"
+author:
+  - 何克润
+documentclass: ctexart
+output:
+  rticles::ctex:
+    fig_caption: yes
+    number_sections: yes
+    toc: yes
+classoption: "hyperref,"
+---
+
+# 导言
+第三次作业包括wooldridge第七章和第八章的内容，具体题目如下：
+第七章 P212第六题；P215上机C10题
+第八章 P243第一题；P244上机C2题
+
+# 第七章:含有定性变量的多元回归
+
+## P212 第六题
+
+题目：*为了检验工作培训项目对工人以后工资的有效性，我们设定了模型*
+
+$\log(wage)=\beta_{0}+\beta_{1}train+\beta_{2}educ+\beta_{3}exper+u$
+
+*其中，train表示的虚拟变量，在工人参与这个项目时取值1。想象误差项包括了无法观测的工人能力。如果能力越低的工人被选派去参加这个项目的机会越大,而且你使用了一个OLS分析,那你认为$\beta_{1}$的OLS估计量可能有什么样的偏误？(提示：参考第3章)*
+
+答案：
+“误差项包括了无法观测的工人能力，如果能力越低的工人被选派去参加这个项目的机会越大”意味着因变量train与误差项u相关，这违背了零条件均值假设；如果继续用OLS估计，则会产生内生性问题，使得$\beta_{1}$的OLS估计量不具有无偏性和一致性
+
+## P215 上机C10题
+
+题目：*本题利用AFFAIRS.RAW中女性的数据。*
+
+*(1) 为affair估计一个线性概率模型，二元指示变量在女性至少有一次婚外恋时等于1。解释变量包括yrsmarr、age和educ。解释yrsmarr的系数。*
+
+答：利用R进行模型估计，报告源代码如下(回归结果见表1)：
+
+```{r include=FALSE}
+library(wooldridge)
+library(stargazer)
+```
+
+```{r echo=FALSE, results='asis'}
+data_female<-subset.data.frame(affairs,male==0)
+options(digits=3)
+lpm1<-lm(affair~yrsmarr+age+educ,data=data_female)
+stargazer(lpm1,title = "LPM1回归结果",
+          header = F, dep.var.labels = "Affair",
+          single.row = T)
+```
+
+R源代码：
+```r 
+library(wooldridge)
+library(stargazer)
+```
+```r 
+data_female<-subset.data.frame(affairs,male==0)
+options(digits=3)
+lpm1<-lm(affair~yrsmarr+age+educ,data=data_female)
+stargazer(lpm1,title = "LPM1回归结果",
+          header = F, dep.var.labels = "Affair",
+          single.row = T)
+```
+
+解释：略（按照自己的想法写）
+
+
+*(2)	在控制了yrsmarr后，age和educ对affair还有影响吗？*
+
+答：由表1可知，加入控制变量yrsmarr后,....
+
+
+
+*(3) 在(1)中的模型里加入kids。解释它的系数并判断估计是否在统计上显著。*
+
+答：在（1）中加入kids，得到表2如下：
+
+```{r echo=FALSE, results='asis'}
+options(digits=3)
+lpm2<-lm(affair~yrsmarr+age+educ+kids,data=data_female)
+stargazer(lpm1,lpm2,title="LPM2:加入KIDs后的LPM1回归结果",
+          header = FALSE,
+          dep.var.labels = "Affair",single.row = T)
+```
+
+R源代码：
+```r 
+options(digits=3)
+lpm2<-lm(affair~yrsmarr+age+educ+kids,data=data_female)
+stargazer(lpm1,lpm2,title="LPM2:加入KIDs后的LPM1回归结果",
+          header = FALSE,
+          dep.var.labels = "Affair",single.row = T)
+```
+
+解释：略（按照自己的想法写）
+
+*(4) 对于(3)中的模型，除了kids仍在模型中以外,加人四个宗教虚拟变量。基础组包括那些声称自己反宗教的女性。对于那些非常信仰宗教的和反宗教的女性，报告自己有婚外恋的可能性是不是有差别？宗教信仰的影响有多大？*
+
+答：在模型(3)中加入四个宗教虚拟变量，得到表3：
+
+```{r echo=FALSE, results='asis'}
+options(digits=3)
+lpm3<-lm(affair~yrsmarr+age+educ+kids+notrel+slghtrel+smerel+vryrel,data=data_female)
+stargazer(lpm2,lpm3,
+          title = "LPM3:加入宗教信仰虚拟变量后的LPM2回归结果",
+          header = FALSE,
+          dep.var.labels = "Affair",single.row = T)
+```
+
+R源代码：
+```r 
+options(digits=3)
+lpm3<-lm(affair~yrsmarr+age+educ+kids+notrel+slghtrel+smerel
+        +vryrel,data=data_female)
+stargazer(lpm2,lpm3,
+          title = "LPM3:加入宗教变量后的LPM2回归结果",
+          header = FALSE,
+          dep.var.labels = "Affair",single.row = T)
+```
+
+解释：略（按照自己的想法写）
+
+*(5) 对于那些有宗教信仰(反宗教归为有宗教）和无宗教信仰的女性，报告自己有婚外恋的可能性是不是有差别？宗教信仰的影响有多大？(提示：从（4）中改变基础组很简单。)*
+
+答：改变模型(3)的基准组为有宗教信仰，得到表4如下：
+
+```{r echo=FALSE, results='asis'}
+options(digits=3)
+lpm4<-lm(affair~notrel,data=data_female)#未加入控制变量
+lpm5<-lm(affair~yrsmarr+age+educ+kids+notrel,data=data_female)#加入控制变量
+stargazer(lpm4,lpm5,title = "LPM4:关于“是否有宗教信仰”的回归结果",
+          header = FALSE,dep.var.labels = "Affair",
+          single.row = T)
+```
+
+R源代码：
+```r 
+options(digits=3)
+lpm4<-lm(affair~notrel,data=data_female)#未加入控制变量
+lpm5<-lm(affair~yrsmarr+age+educ+kids+notrel,data=data_female)
+stargazer(lpm4,lpm5,title="LPM4:关于“是否有宗教信仰”的回归结果",
+          header = FALSE,dep.var.labels = "Affair",
+          single.row = T)
+```
+
+解释：略（按照自己的想法写）
+
+# 第八章：异方差性
+
+## P243 第一题
+题目：*下面哪种情况是异方差性造成的结果？*
+
+*(1)  OLS估计量$\widehat{\beta_{j}}$是不一致的。*
+*(2)	通常的F检验不再服从F分布。*
+*(3)	OLS估计量不再是BLUE。*
+
+答案：
+异方差会产生如下影响：
+
+- OLS估计量的无偏性和一致性不会受到影响，即情况(1)不存在
+
+- OLS估计量的方差不具有无偏性，因而通常的F统计量不再是F分布，即情况(2)存在
+
+- OLS估计量的方差不具有有效性，因而OLS估计量不再是BLUE，即情况(3)存在
+
+## P244 C2
+题目：
+*(1) 利用HPRICE1.RAW中的数据得到方程(8.17)的异方差-稳健的标准误。讨论其与通常的标准误之间有何重要差异？*
+$\widehat{price}=-21.77+0.00207lotsize+0.123sqrft+13.85bdrms$
+
+答：回归结果见表5
+```{r include=FALSE}
+library(car)
+library(lmtest)
+library(carData)
+library(sandwich)
+library(zoo)
+```
+
+```{r echo=FALSE, results="asis"}
+options(digits = 3)
+lm1<-lm(price~lotsize+sqrft+bdrms,data=hprice1)
+usual_SE<-coeftest(lm1)
+robust_SE0<-coeftest(lm1,vcov=vcovHC(lm1,type="HC0"))
+robust_SE1<-coeftest(lm1,vcov=vcovHC(lm1,type="HC1"))
+stargazer(usual_SE,robust_SE0,robust_SE1,column.labels=c("Usual","Robust0","Robust1"),
+dep.var.labels = "Price",
+title="通常标准误与稳健标准误的对比",header = F)
+```
+
+R源代码：
+```r 
+library(car)
+library(lmtest)
+options(digits = 3)
+lm1<-lm(price~lotsize+sqrft+bdrms,data=hprice1)
+usual_SE<-coeftest(lm1)
+robust_SE0<-coeftest(lm1,vcov=vcovHC(lm1,type="HC0"))
+robust_SE1<-coeftest(lm1,vcov=vcovHC(lm1,type="HC1"))
+stargazer(usual_SE,robust_SE0,robust_SE1,
+column.labels=c("Usual","Robust0","Robust1"),
+dep.var.labels = "Price",
+title="通常标准误与稳健标准误的对比",header = F)
+```
+
+解释：略，请自行补充
+
+*(2)	对方程(8.18)重复第(1)步操作。*
+$\widehat{log(price)}=-1.30+0.168log(lotsize)+0.700log(sqrft)+0.037bdrms$
+
+答：回归结果见表6
+```{r echo=FALSE, results="asis"}
+options(digits = 3)
+lm2<-lm(log(price)~log(lotsize)+log(sqrft)+bdrms,data=hprice1)
+usual_SE_log<-coeftest(lm2)
+robust_SE0_log<-coeftest(lm2,vcov=vcovHC(lm2,type="HC0"))
+robust_SE1_log<-coeftest(lm2,vcov=vcovHC(lm2,type="HC1"))
+stargazer(usual_SE_log,robust_SE0_log,robust_SE1_log,
+column.labels=c("Usual","Robust0","Robust1"),dep.var.labels = "Log(Price)",
+title="通常标准误与稳健标准误的对比(对数变换后)",header =F)
+```
+
+R源代码：
+
+```r 
+options(digits = 3)
+lm2<-lm(log(price)~log(lotsize)+log(sqrft)+bdrms,data=hprice1)
+usual_SE_log<-coeftest(lm2)
+robust_SE0_log<-coeftest(lm2,vcov=vcovHC(lm2,type="HC0"))
+robust_SE1_log<-coeftest(lm2,vcov=vcovHC(lm2,type="HC1"))
+stargazer(usual_SE_log,robust_SE0_log,robust_SE1_log,
+column.labels=c("Usual","Robust0","Robust1"),dep.var.labels = "Log(Price)",
+title="通常标准误与稳健标准误的对比(对数变换后)",header =F)
+```
+
+*(3)	此例对异方差性和对因变量所做的变换说明了什么？*
+
+答：略，（通过观察（1）和（2）的结果可得）
+
+# 结语
+
+## 使用本文档的建议
+
+- 此版本为作业初稿，鉴于本人能力和注意力有限，如有错误，请随时告知我
+- 用R语言写作业的同学可以直接参考代码，但请弄懂每行代码的意思，否则照抄代码毫无意义，还不如去使用其他学习成本更低的软件
+- 用其他软件做作业的同学，请无视代码和排版，参考输出结果即可（不一定正确，请批判性地看待）
